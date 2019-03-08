@@ -1,0 +1,91 @@
+---
+title: "677hw"
+author: "Kaiyu Yan"
+date: "March 8, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(ACSWR)
+library(readr)
+library(sfsmisc)
+```
+
+```{r}
+A <- read.delim("maybe_uniform.txt",header = F, sep= "",dec = " ")
+A <-  cbind(A[1,], A[2,],A[3,],A[4,],A[5,])
+A <-  as.numeric(as.vector(t(A)[,1]))
+hist(A)
+dist_A <- ecdf(A)
+plot(dist_A)
+ks.test(A,"punif")
+x<-seq(-5, 5, by=0.01)
+fx <- ifelse(x > 0 & x <=0.5, 3/2,
+   ifelse(x > 0.5 & x < 1,  0.5, 0))
+plot(x,fx)
+ks.test(fx,"punif")
+```
+### I think the distribution of maybe_uniform belongs to uniform distribution on [0,1]. Also, there should be better fit model.
+
+
+```{r}
+B <- read.table("maybe_normal.txt")
+B <-  cbind(B[1,], B[2,],B[3,],B[4,],B[5,],B[6,], B[7,],B[8,],B[9,],B[10,])
+B <-  as.numeric(as.vector(t(B)[,1]))
+qqnorm(B)
+hist(B)
+normal <- rnorm(1000,26,2)
+hist(normal)
+ks.test(B,"pnorm")
+```
+### According to the ks-test result, the maybe_normal belongs to normal distribution.
+
+```{r}
+
+C1=read.table("maybe_same_1.txt")
+x=c(C1$V1,C1$V2,C1$V3,C1$V4,C1$V5)
+C2=read.table("maybe_same_2.txt")
+y=c(C2$V1,C2$V2,C2$V3,C2$V4,C2$V5)
+ks.test(x,y)
+ks.test(x+2,y)
+```
+### For the first question. Since p-value of of ks.test is much larger than 0.05, we cannot to reject the null hypotheses, C1,C2 are from the same distribution. Also, for the second qeustion. Since p-value of ks-test is much smaller than 0.05.Then we reject the null hypotheses, therefore C1+2 and C2 are not from the same distribution
+
+
+```{r}
+D <- readRDS("norm_sample.Rdata")
+ks.test(D,"pnorm")
+D_ecdf <- ecdf(D)
+summary(D_ecdf)
+plot.ecdf(D)
+
+D_norm <- rnorm(1000)
+ks.test(D,D_norm)
+
+```
+
+
+```{r}
+E1 <- read.table("faithful(1).dat",header = T,skip = 25)
+E2 <-  read.table("fijiquakes(1).dat",header = T)
+
+ecdf.ksCI(E2$mag)
+ecdf.ksCI(E1$waiting)
+mag <- ecdf(E2$mag)
+mag(4.9) - mag(4.3)
+
+s = sd(E2$mag)
+n = length(E2$mag)
+error <- qt(0.95,df=n-1)*s/sqrt(n)
+
+up <- mean(E1$waiting)+error
+low <- mean(E1$waiting) -error
+
+sprintf("The CI is %e - %e",low,up)
+```
